@@ -1,0 +1,15 @@
+services:
+  # Option 1: Web Service (Node.js production server with health check)
+  - type: web
+    name: osool-luxury-watches
+    runtime: node
+    plan: free
+    region: frankfurt # Low-latency for Middle East / Europe
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
