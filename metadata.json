@@ -1,0 +1,6 @@
+{
+  "name": "OSOOL | أصول — Luxury Saudi Watches",
+  "description": "Premium minimalist men's watches crafted for modern Saudi elegance. Dark luxury aesthetic, timeless design, and direct WhatsApp concierge ordering.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

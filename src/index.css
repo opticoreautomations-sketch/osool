@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-serif-luxury: "Cormorant Garamond", "Amiri", Georgia, serif;
+    --font-serif-arabic: "Amiri", "Cormorant Garamond", serif;
+    --font-sans-modern: "Plus Jakarta Sans", "Tajawal", -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-arabic-sans: "Tajawal", "Plus Jakarta Sans", -apple-system, sans-serif;
+    --font-cinzel: "Cinzel", "Amiri", serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    color-scheme: dark;
+    background-color: #050505;
+  }
+
+  body {
+    background-color: #050505;
+    color: #F5F3EF;
+    font-family: var(--font-sans-modern);
+  }
+
+  [dir="rtl"] {
+    font-family: var(--font-arabic-sans);
+  }
+}
+
+.font-serif-luxury {
+  font-family: var(--font-serif-luxury);
+}
+
+.font-serif-arabic {
+  font-family: var(--font-serif-arabic);
+}
+
+.font-cinzel {
+  font-family: var(--font-cinzel);
+}
+
+.font-sans-modern {
+  font-family: var(--font-sans-modern);
+}
+
+.font-arabic-sans {
+  font-family: var(--font-arabic-sans);
+}
+
+/* Custom subtle luxury scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #C6A76A;
+}
+
