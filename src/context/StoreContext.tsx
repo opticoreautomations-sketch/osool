@@ -463,10 +463,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const subtotal = product ? (product.priceSAR * quantity) : 0;
 
-  // Sync html dir and lang attributes when language changes
+  // Sync html dir, lang attributes, and page title when language changes
   useEffect(() => {
     document.documentElement.lang = language;
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+    document.title = language === 'ar'
+      ? 'أصول | OSOOL — ساعات رجالية فاخرة'
+      : 'OSOOL | أصول — Luxury Saudi Watches';
   }, [language]);
 
   // Listen for storage events to synchronize orders across windows / tabs
