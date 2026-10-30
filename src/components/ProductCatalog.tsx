@@ -30,6 +30,11 @@ export const ProductCatalog: React.FC = () => {
   } = useStore();
 
   const isAr = language === 'ar';
+
+  if (products.length === 0) {
+    return null;
+  }
+
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc'>('featured');
@@ -103,7 +108,6 @@ export const ProductCatalog: React.FC = () => {
       <div className="absolute top-1/4 start-1/2 -translate-x-1/2 w-full max-w-5xl h-96 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(198,167,106,0.08),transparent_70%)] pointer-events-none blur-2xl" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-10 space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#121212] border border-[#2a2a2a] text-[#C6A76A] text-xs font-medium uppercase tracking-widest">

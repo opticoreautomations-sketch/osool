@@ -34,6 +34,11 @@ export const ProductSection: React.FC = () => {
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
 
   const isAr = language === 'ar';
+
+  if (!product || products.length === 0) {
+    return null;
+  }
+
   const currentImage = product.images[selectedImageIndex] || product.images[0];
 
   const handleSelectProduct = (id: string) => {

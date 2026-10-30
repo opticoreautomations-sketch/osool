@@ -18,6 +18,7 @@ import {
 import { 
   OSOOL_PRODUCT, 
   DEFAULT_PRODUCTS, 
+  SAMPLE_PRODUCTS,
   DEFAULT_PROMO_CODES,
   DEFAULT_STORE_BANNER,
   STORE_CONFIG, 
@@ -25,7 +26,7 @@ import {
   generateMultiItemWhatsAppOrderData 
 } from '../config/storeConfig';
 
-const STORAGE_KEY_PRODUCTS = 'osool_products_v2';
+const STORAGE_KEY_PRODUCTS = 'osool_products_v4';
 const STORAGE_KEY_CART = 'osool_cart_items_v2';
 const STORAGE_KEY_WHATSAPP = 'osool_whatsapp_v1';
 const STORAGE_KEY_ORDERS = 'osool_draft_orders_v1';
@@ -45,13 +46,15 @@ interface StoreContextType {
   
   // Product & Products Catalog
   products: Product[];
-  product: Product; // currently active/selected product
+  product: Product | null; // currently active/selected product, or null if no products
   selectedProductId: string;
   setSelectedProductId: (id: string) => void;
   addProduct: (newProduct: Product) => void;
   updateProduct: (updatedProduct: Product) => void;
   deleteProduct: (productId: string) => void;
+  deleteAllProducts: () => void;
   resetToDefaultProducts: () => void;
+  loadSampleProducts: () => void;
   
   // Admin View & Authentication State
   isAdminView: boolean;
@@ -306,20 +309,20 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch {}
   };
 
-  // Products list from localStorage or default DEFAULT_PRODUCTS
+  // Products list from localStorage or default DEFAULT_PRODUCTS (empty by default)
   const [products, setProducts] = useState<Product[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_PRODUCTS);
-      if (saved) {
+      if (saved !== null) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= DEFAULT_PRODUCTS.length) {
+        if (Array.isArray(parsed)) {
           return parsed;
         }
       }
     } catch (e) {
       console.error('Error loading products from storage', e);
     }
-    // Update local storage with complete multi-product collection
+    // Default to DEFAULT_PRODUCTS (empty array)
     try {
       localStorage.setItem(STORAGE_KEY_PRODUCTS, JSON.stringify(DEFAULT_PRODUCTS));
     } catch {}
@@ -327,11 +330,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
 
   const [selectedProductId, setSelectedProductId] = useState<string>(() => {
-    return products[0]?.id || DEFAULT_PRODUCTS[0].id;
+    return products[0]?.id || '';
   });
 
-  // Current active product
-  const product = products.find(p => p.id === selectedProductId) || products[0] || DEFAULT_PRODUCTS[0];
+  // Current active product (or null if no products exist)
+  const product = products.find(p => p.id === selectedProductId) || products[0] || null;
 
   // Multi-item cart state in localStorage
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
@@ -458,7 +461,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isOrderModalOpen, setIsOrderModalOpen] = useState<boolean>(false);
   const [isOwnerGuideOpen, setIsOwnerGuideOpen] = useState<boolean>(false);
 
-  const subtotal = product.priceSAR * quantity;
+  const subtotal = product ? (product.priceSAR * quantity) : 0;
 
   // Sync html dir and lang attributes when language changes
   useEffect(() => {
@@ -526,20 +529,28 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const deleteProduct = (productId: string) => {
-    if (products.length <= 1) {
-      alert(language === 'ar' ? 'لا يمكن حذف آخر منتج في المتجر' : 'Cannot delete the only product in store');
-      return;
-    }
     const updated = products.filter(p => p.id !== productId);
     saveProducts(updated);
     if (selectedProductId === productId) {
-      setSelectedProductId(updated[0].id);
+      setSelectedProductId(updated[0]?.id || '');
     }
+  };
+
+  const deleteAllProducts = () => {
+    saveProducts([]);
+    setSelectedProductId('');
+    clearCart();
+  };
+
+  const loadSampleProducts = () => {
+    saveProducts(SAMPLE_PRODUCTS);
+    setSelectedProductId(SAMPLE_PRODUCTS[0]?.id || '');
   };
 
   const resetToDefaultProducts = () => {
     saveProducts(DEFAULT_PRODUCTS);
-    setSelectedProductId(DEFAULT_PRODUCTS[0].id);
+    setSelectedProductId('');
+    clearCart();
   };
 
   const setLanguage = (lang: Language) => {
@@ -573,7 +584,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const addToCart = (targetProduct?: Product | number, qtyToAdd?: number) => {
-    let actualProduct: Product;
+    let actualProduct: Product | null = null;
     let actualQty: number;
 
     if (typeof targetProduct === 'number') {
@@ -587,10 +598,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       actualQty = qtyToAdd !== undefined ? qtyToAdd : quantity;
     }
 
+    if (!actualProduct) return;
+
     const safeAmount = Math.max(1, Math.min(10, actualQty));
     
     setCartItems(prev => {
-      const existingIndex = prev.findIndex(item => item.product.id === actualProduct.id);
+      const existingIndex = prev.findIndex(item => item.product.id === actualProduct!.id);
       let updated: CartItem[];
       if (existingIndex > -1) {
         updated = prev.map((item, idx) => {
@@ -603,7 +616,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           return item;
         });
       } else {
-        updated = [...prev, { product: actualProduct, quantity: safeAmount }];
+        updated = [...prev, { product: actualProduct!, quantity: safeAmount }];
       }
       try {
         localStorage.setItem(STORAGE_KEY_CART, JSON.stringify(updated));
@@ -914,7 +927,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Submit checkout order: marks order as 'pending' (waiting for contact), stores it, clears cart, and opens success modal
   const submitCheckoutOrder = (): DraftOrder => {
-    const itemsToOrder: CartItem[] = cartItems.length > 0 ? cartItems : [{ product, quantity: 1 }];
+    const itemsToOrder: CartItem[] = cartItems.length > 0 
+      ? cartItems 
+      : product 
+        ? [{ product, quantity: 1 }] 
+        : [];
+    if (itemsToOrder.length === 0) {
+      return null as any;
+    }
     const totalOrderQty = itemsToOrder.reduce((sum, i) => sum + i.quantity, 0);
     const calculatedSubtotal = itemsToOrder.reduce((sum, i) => sum + (i.product.priceSAR * i.quantity), 0);
     const orderDiscount = appliedDiscount;
@@ -1029,8 +1049,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const triggerDirectWhatsAppOrder = (customDetails?: WhatsAppOrderDetails) => {
     const itemsToOrder: CartItem[] = cartItems.length > 0 
       ? cartItems 
-      : [{ product, quantity: customDetails?.quantity || quantity }];
+      : product 
+        ? [{ product, quantity: customDetails?.quantity || quantity }]
+        : [];
     
+    if (itemsToOrder.length === 0) return;
     const totalOrderQty = itemsToOrder.reduce((sum, i) => sum + i.quantity, 0);
     const calculatedSubtotal = itemsToOrder.reduce((sum, i) => sum + (i.product.priceSAR * i.quantity), 0);
     const orderDiscount = customDetails?.discountAmount !== undefined ? customDetails.discountAmount : appliedDiscount;
@@ -1116,7 +1139,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         addProduct,
         updateProduct,
         deleteProduct,
+        deleteAllProducts,
         resetToDefaultProducts,
+        loadSampleProducts,
         isAdminView,
         setIsAdminView,
         isAdminAuthenticated,

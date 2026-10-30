@@ -18,6 +18,10 @@ export const StickyMobileOrderBar: React.FC = () => {
   const [justAdded, setJustAdded] = useState(false);
   const isAr = language === 'ar';
 
+  if (!product || products.length === 0) {
+    return null;
+  }
+
   const handleAdd = () => {
     addToCart(product, 1);
     setJustAdded(true);

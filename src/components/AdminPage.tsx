@@ -105,7 +105,9 @@ export const AdminPage: React.FC = () => {
     addProduct, 
     updateProduct, 
     deleteProduct, 
+    deleteAllProducts,
     resetToDefaultProducts, 
+    loadSampleProducts,
     setIsAdminView, 
     setSelectedProductId,
     whatsappNumber,
@@ -1263,100 +1265,152 @@ Would you like us to confirm and dispatch your order today?`;
           <div className="space-y-6">
             
             {/* Products Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-serif-luxury font-medium text-[#F5F3EF]">
                   {isAr ? 'قائمة المنتجات المعروضة في المتجر' : 'Products in Storefront Catalog'}
                 </h2>
                 <p className="text-xs text-[#8c8c8c]">
                   {isAr 
-                    ? 'يمكنك إضافة عدد غير محدود من ساعات أصول، وتعديل الأسعار والمواصفات والصور.'
+                    ? 'يمكنك إضافة عدد غير محدود من ساعات أصول، وتعديل الأسعار والمواصفات والصور، أو إفراغ الكتالوج بالكامل.'
                     : 'Add, edit, or configure OSOOL watches with custom pricing and imagery.'}
                 </p>
               </div>
 
-              <button
-                onClick={openAddForm}
-                className="px-4 py-2 text-xs font-semibold text-[#050505] bg-[#C6A76A] hover:bg-[#D4B87D] rounded transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>{isAr ? 'إضافة ساعة جديدة' : 'Add New Watch'}</span>
-              </button>
-            </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {products.length > 0 && (
+                  <button
+                    onClick={() => {
+                      if (window.confirm(isAr ? 'هل أنت متأكد من حذف جميع المنتجات من المتجر؟' : 'Are you sure you want to delete all products?')) {
+                        deleteAllProducts();
+                        showToast(isAr ? 'تم حذف جميع المنتجات وإفراغ الكتالوج' : 'All products deleted');
+                      }
+                    }}
+                    className="px-3.5 py-2 text-xs font-semibold text-rose-300 bg-rose-950/40 hover:bg-rose-900/50 border border-rose-800/40 rounded transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>{isAr ? 'حذف جميع المنتجات' : 'Delete All Products'}</span>
+                  </button>
+                )}
 
-            {/* Products Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((prod) => (
-                <div 
-                  key={prod.id} 
-                  className="rounded-lg bg-[#0c0c0c] border border-[#222222] hover:border-[#333333] transition-all overflow-hidden flex flex-col justify-between group"
+                <button
+                  onClick={openAddForm}
+                  className="px-4 py-2 text-xs font-semibold text-[#050505] bg-[#C6A76A] hover:bg-[#D4B87D] rounded transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                 >
-                  <div>
-                    {/* Watch Image Banner */}
-                    <div className="relative aspect-4/3 bg-[#111111] overflow-hidden">
-                      <img
-                        src={prod.images[0]?.src || PRESET_WATCH_IMAGES[0].src}
-                        alt={prod.nameEn}
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
-                      />
-                      <div className="absolute top-3 end-3 px-2.5 py-1 rounded bg-[#050505]/80 backdrop-blur-md border border-[#222222] text-[11px] font-mono text-[#C6A76A] font-bold">
-                        {prod.priceSAR} {isAr ? prod.currencyAr : prod.currencyEn}
-                      </div>
-
-                      <div className="absolute bottom-3 start-3 px-2 py-0.5 rounded bg-[#050505]/80 backdrop-blur-md text-[10px] text-[#A3A3A3]">
-                        {prod.inStock ? (isAr ? 'متوفر' : 'In Stock') : (isAr ? 'نفد' : 'Out')}
-                      </div>
-                    </div>
-
-                    {/* Body Info */}
-                    <div className="p-5 space-y-2 text-start">
-                      <div className="text-[11px] text-[#C6A76A] font-mono uppercase tracking-wider">
-                        {isAr ? prod.categoryAr : prod.categoryEn}
-                      </div>
-                      
-                      <h3 className="text-base font-semibold text-[#F5F3EF]">
-                        {isAr ? prod.nameAr : prod.nameEn}
-                      </h3>
-
-                      <p className="text-xs text-[#8c8c8c] line-clamp-2 leading-relaxed">
-                        {isAr ? prod.shortDescriptionAr : prod.shortDescriptionEn}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Card Actions Footer */}
-                  <div className="p-4 border-t border-[#1a1a1a] bg-[#090909] flex items-center justify-between gap-2">
-                    <button
-                      onClick={() => handlePreviewInStore(prod.id)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#141414] hover:bg-[#1f1f1f] border border-[#262626] text-xs text-[#A3A3A3] hover:text-[#F5F3EF] transition-colors cursor-pointer"
-                      title={isAr ? 'معاينة في المتجر' : 'Preview in Store'}
-                    >
-                      <Eye className="w-3.5 h-3.5 text-[#C6A76A]" />
-                      <span>{isAr ? 'معاينة' : 'Preview'}</span>
-                    </button>
-
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={() => openEditForm(prod)}
-                        className="p-1.5 rounded bg-[#141414] hover:bg-[#1f1f1f] border border-[#262626] text-xs text-[#A3A3A3] hover:text-[#C6A76A] transition-colors cursor-pointer"
-                        title={isAr ? 'تعديل' : 'Edit'}
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                      </button>
-
-                      <button
-                        onClick={() => deleteProduct(prod.id)}
-                        className="p-1.5 rounded bg-[#141414] hover:bg-red-950/40 border border-[#262626] text-xs text-[#666666] hover:text-red-400 transition-colors cursor-pointer"
-                        title={isAr ? 'حذف المنتج' : 'Delete'}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{isAr ? 'إضافة ساعة جديدة' : 'Add New Watch'}</span>
+                </button>
+              </div>
             </div>
+
+            {products.length === 0 ? (
+              <div className="py-16 text-center space-y-4 bg-[#0c0c0c] rounded-2xl border border-[#222222] p-8 max-w-xl mx-auto my-4">
+                <div className="w-16 h-16 rounded-full bg-[#141414] border border-[#2a2a2a] flex items-center justify-center mx-auto text-[#C6A76A]">
+                  <Package className="w-7 h-7" />
+                </div>
+                <h3 className="text-lg font-semibold text-[#F5F3EF]">
+                  {isAr ? 'لا توجد منتجات في المتجر حالياً' : 'No products in catalog'}
+                </h3>
+                <p className="text-xs text-[#8c8c8c] max-w-md mx-auto leading-relaxed">
+                  {isAr 
+                    ? 'تم إفراغ جميع المنتجات بنجاح. يمكنك الآن البدء بإضافة ساعاتك ومنتجاتك الخاصة عبر زر "إضافة ساعة جديدة"، أو استعادة النماذج الست الجاهزة بنقرة واحدة.' 
+                    : 'All products are cleared. You can now add your custom watches using the button below, or reload the 6 sample models.'}
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                  <button
+                    onClick={openAddForm}
+                    className="w-full sm:w-auto px-5 py-2.5 text-xs font-semibold text-[#050505] bg-[#C6A76A] hover:bg-[#D4B87D] rounded-lg transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>{isAr ? 'إضافة أول ساعة للمتجر' : 'Add First Watch'}</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      loadSampleProducts();
+                      showToast(isAr ? 'تم استيراد التشكيلة النموذجية (6 ساعات)' : 'Sample lineup loaded');
+                    }}
+                    className="w-full sm:w-auto px-4 py-2.5 text-xs font-medium text-[#A3A3A3] hover:text-[#F5F3EF] bg-[#141414] hover:bg-[#1a1a1a] border border-[#262626] rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5 text-[#C6A76A]" />
+                    <span>{isAr ? 'تحميل التشكيلة النموذجية (6 ساعات)' : 'Load 6 Sample Watches'}</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Products Grid */
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.map((prod) => (
+                  <div 
+                    key={prod.id} 
+                    className="rounded-lg bg-[#0c0c0c] border border-[#222222] hover:border-[#333333] transition-all overflow-hidden flex flex-col justify-between group"
+                  >
+                    <div>
+                      {/* Watch Image Banner */}
+                      <div className="relative aspect-4/3 bg-[#111111] overflow-hidden">
+                        <img
+                          src={prod.images[0]?.src || PRESET_WATCH_IMAGES[0].src}
+                          alt={prod.nameEn}
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+                        />
+                        <div className="absolute top-3 end-3 px-2.5 py-1 rounded bg-[#050505]/80 backdrop-blur-md border border-[#222222] text-[11px] font-mono text-[#C6A76A] font-bold">
+                          {prod.priceSAR} {isAr ? prod.currencyAr : prod.currencyEn}
+                        </div>
+
+                        <div className="absolute bottom-3 start-3 px-2 py-0.5 rounded bg-[#050505]/80 backdrop-blur-md text-[10px] text-[#A3A3A3]">
+                          {prod.inStock ? (isAr ? 'متوفر' : 'In Stock') : (isAr ? 'نفد' : 'Out')}
+                        </div>
+                      </div>
+
+                      {/* Body Info */}
+                      <div className="p-5 space-y-2 text-start">
+                        <div className="text-[11px] text-[#C6A76A] font-mono uppercase tracking-wider">
+                          {isAr ? prod.categoryAr : prod.categoryEn}
+                        </div>
+                        
+                        <h3 className="text-base font-semibold text-[#F5F3EF]">
+                          {isAr ? prod.nameAr : prod.nameEn}
+                        </h3>
+
+                        <p className="text-xs text-[#8c8c8c] line-clamp-2 leading-relaxed">
+                          {isAr ? prod.shortDescriptionAr : prod.shortDescriptionEn}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Card Actions Footer */}
+                    <div className="p-4 border-t border-[#1a1a1a] bg-[#090909] flex items-center justify-between gap-2">
+                      <button
+                        onClick={() => handlePreviewInStore(prod.id)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#141414] hover:bg-[#1f1f1f] border border-[#262626] text-xs text-[#A3A3A3] hover:text-[#F5F3EF] transition-colors cursor-pointer"
+                        title={isAr ? 'معاينة في المتجر' : 'Preview in Store'}
+                      >
+                        <Eye className="w-3.5 h-3.5 text-[#C6A76A]" />
+                        <span>{isAr ? 'معاينة' : 'Preview'}</span>
+                      </button>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => openEditForm(prod)}
+                          className="p-1.5 rounded bg-[#141414] hover:bg-[#1f1f1f] border border-[#262626] text-xs text-[#A3A3A3] hover:text-[#C6A76A] transition-colors cursor-pointer"
+                          title={isAr ? 'تعديل' : 'Edit'}
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button
+                          onClick={() => deleteProduct(prod.id)}
+                          className="p-1.5 rounded bg-[#141414] hover:bg-red-950/40 border border-[#262626] text-xs text-[#666666] hover:text-red-400 transition-colors cursor-pointer"
+                          title={isAr ? 'حذف المنتج' : 'Delete'}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
           </div>
         )}
@@ -1388,13 +1442,31 @@ Would you like us to confirm and dispatch your order today?`;
                 <div className="text-sm font-semibold text-[#F5F3EF]">
                   {isAr ? 'محفوظ محلياً (localStorage)' : 'Saved in localStorage'}
                 </div>
-                <button
-                  onClick={resetToDefaultProducts}
-                  className="text-[11px] text-[#8c8c8c] hover:text-[#C6A76A] underline pt-0.5 inline-flex items-center gap-1 cursor-pointer"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  <span>{isAr ? 'استعادة ضبط المصنع (منتج واحد)' : 'Reset to Default (1 Product)'}</span>
-                </button>
+                <div className="pt-2 flex flex-col gap-1.5">
+                  <button
+                    onClick={() => {
+                      if (window.confirm(isAr ? 'هل أنت متأكد من حذف جميع المنتجات وإفراغ الكتالوج؟' : 'Are you sure you want to delete all products?')) {
+                        deleteAllProducts();
+                        showToast(isAr ? 'تم إفراغ جميع المنتجات من المتجر' : 'Catalog cleared');
+                      }
+                    }}
+                    className="text-[11px] text-rose-400 hover:text-rose-300 underline inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    <span>{isAr ? 'إفراغ الكتالوج (حذف جميع المنتجات)' : 'Clear Catalog (Delete All Products)'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      loadSampleProducts();
+                      showToast(isAr ? 'تم استيراد التشكيلة النموذجية (6 ساعات)' : 'Sample lineup loaded');
+                    }}
+                    className="text-[11px] text-[#C6A76A] hover:text-[#D4B87D] underline inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>{isAr ? 'استيراد التشكيلة النموذجية الجاهزة (6 ساعات)' : 'Load Sample Lineup (6 Watches)'}</span>
+                  </button>
+                </div>
               </div>
             </div>
 

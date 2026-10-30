@@ -40,7 +40,7 @@ export const WhatsAppOrderModal: React.FC = () => {
   const [notes, setNotes] = useState('');
   const [copied, setCopied] = useState(false);
 
-  if (!isOrderModalOpen) return null;
+  if (!isOrderModalOpen || !product) return null;
 
   const isAr = language === 'ar';
 

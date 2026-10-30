@@ -156,9 +156,9 @@ export const OSOOL_PRODUCT: Product = {
 };
 
 /**
- * Signature Multiple Product Lineup for OSOOL
+ * Sample / Template Product Lineup for OSOOL (Can be loaded optionally by Admin)
  */
-export const DEFAULT_PRODUCTS: Product[] = [
+export const SAMPLE_PRODUCTS: Product[] = [
   OSOOL_PRODUCT,
   {
     id: 'osool-dore',
@@ -620,6 +620,11 @@ export const DEFAULT_PRODUCTS: Product[] = [
     ]
   }
 ];
+
+/**
+ * Default Storefront Catalog is empty: the admin adds all products
+ */
+export const DEFAULT_PRODUCTS: Product[] = [];
 
 /**
  * Frequently Asked Questions (Editable answers)

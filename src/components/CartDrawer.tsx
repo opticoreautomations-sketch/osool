@@ -127,22 +127,24 @@ export const CartDrawer: React.FC = () => {
   };
 
   // Preview message for step 2
-  const effectiveItems = cartItems.length > 0 ? cartItems : [{ product, quantity: 1 }];
-  const { messageText } = generateMultiItemWhatsAppOrderData(
-    effectiveItems,
-    {
-      customerName,
-      customerPhone,
-      customerCity,
-      customerAddress,
-      preferredPayment,
-      quantity: cartQuantity,
-      promoCode: activePromoCode?.code,
-      discountAmount: appliedDiscount > 0 ? appliedDiscount : undefined,
-      finalTotal: cartFinalTotal
-    },
-    language
-  );
+  const effectiveItems = cartItems.length > 0 ? cartItems : (product ? [{ product, quantity: 1 }] : []);
+  const { messageText } = effectiveItems.length > 0 
+    ? generateMultiItemWhatsAppOrderData(
+        effectiveItems,
+        {
+          customerName,
+          customerPhone,
+          customerCity,
+          customerAddress,
+          preferredPayment,
+          quantity: cartQuantity,
+          promoCode: activePromoCode?.code,
+          discountAmount: appliedDiscount > 0 ? appliedDiscount : undefined,
+          finalTotal: cartFinalTotal
+        },
+        language
+      )
+    : { messageText: '' };
 
 
   return (
@@ -744,11 +746,12 @@ export const CartDrawer: React.FC = () => {
                     ? 'أضف ساعات أصول إلى السلة للاستمتاع بالأناقة الهادئة وتأكيد طلبك مباشرة.'
                     : 'Add OSOOL timepieces to your bag to enjoy quiet luxury and finalize via WhatsApp.'}
                 </p>
-                <div className="space-y-3 pt-2 text-start">
-                  <div className="text-[11px] text-[#C6A76A] font-semibold text-center">
-                    {isAr ? 'اختر أي ساعة لإضافتها لسلتك:' : 'Select any timepiece to add to your bag:'}
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
+                {products.length > 0 && (
+                  <div className="space-y-3 pt-2 text-start">
+                    <div className="text-[11px] text-[#C6A76A] font-semibold text-center">
+                      {isAr ? 'اختر أي ساعة لإضافتها لسلتك:' : 'Select any timepiece to add to your bag:'}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
                     {products.slice(0, 4).map((p) => (
                       <button
                         key={p.id}
@@ -784,6 +787,7 @@ export const CartDrawer: React.FC = () => {
                     </div>
                   )}
                 </div>
+                )}
               </div>
             ) : checkoutStep === 'cart' ? (
               /* Step 1: Cart Items List */

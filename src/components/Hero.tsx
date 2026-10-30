@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
-import { ArrowDown, ShoppingBag, ShieldCheck, Sparkles, Check, ChevronRight, ChevronLeft } from 'lucide-react';
+import { ArrowDown, ShoppingBag, ShieldCheck, Sparkles, Check, ChevronRight, ChevronLeft, PackageSearch } from 'lucide-react';
 
 export const Hero: React.FC = () => {
   const { 
@@ -9,11 +9,72 @@ export const Hero: React.FC = () => {
     product, 
     selectedProductId, 
     setSelectedProductId, 
-    addToCart 
+    addToCart
   } = useStore();
 
   const isAr = language === 'ar';
   const [justAdded, setJustAdded] = useState(false);
+
+  if (!product || products.length === 0) {
+    return (
+      <section className="relative min-h-[calc(100vh-5rem)] flex items-center justify-center overflow-hidden bg-[#050505] border-b border-[#1a1a1a]">
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-20 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(198,167,106,0.15),transparent_70%)]" 
+          aria-hidden="true"
+        />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10 w-full text-center">
+          <div className="max-w-3xl mx-auto space-y-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#141414] border border-[#2a2a2a] text-xs tracking-widest text-[#C6A76A] uppercase font-medium">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{isAr ? 'المملكة العربية السعودية · فخامة هادئة' : 'Saudi Arabia · Quiet Luxury'}</span>
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif-luxury font-medium tracking-tight text-[#F5F3EF] leading-tight">
+              {isAr ? (
+                <span className="font-serif-arabic font-bold block">
+                  وقتك.. يعكس أصولك.
+                </span>
+              ) : (
+                <span>Time, Defined by You.</span>
+              )}
+            </h1>
+
+            <p className="text-base sm:text-lg text-[#A3A3A3] leading-relaxed max-w-xl mx-auto">
+              {isAr
+                ? 'علامة ساعات سعودية فاخرة ترتكز على جماليات الفخامة الهادئة والتصميم المينيمالي. التشكيلة الاستثنائية الجديدة قيد الإطلاق قريباً.'
+                : 'A contemporary Saudi luxury timepiece label centered on quiet prestige and architectural minimalism. The new collection is arriving soon.'}
+            </p>
+
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3.5">
+              <button
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById('order-status');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold tracking-wide text-[#050505] bg-[#C6A76A] hover:bg-[#D4B87D] rounded-lg transition-all shadow-lg active:scale-98 cursor-pointer"
+              >
+                <PackageSearch className="w-4 h-4" />
+                <span>{isAr ? 'تتبع حالة طلب سابق' : 'Track Order Status'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById('philosophy');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-medium tracking-wide text-[#F5F3EF] bg-[#111111] hover:bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg transition-all cursor-pointer"
+              >
+                <span>{isAr ? 'قصة علامة أصول' : 'Discover Our Story'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const activeImage = product.images[0]?.src || '/src/assets/images/hero_osool_noir_watch_1793109557552.jpg';
 
