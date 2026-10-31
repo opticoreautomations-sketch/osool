@@ -21,7 +21,6 @@ import { AdminPage } from './components/AdminPage';
 import { AdminLoginPage } from './components/AdminLoginPage';
 import { OrderConfirmationModal } from './components/OrderConfirmationModal';
 import { PromoAnnouncementBar } from './components/PromoAnnouncementBar';
-import { OrderStatusLookup } from './components/OrderStatusLookup';
 
 function StoreAppContent() {
   const { isAdminView, isAdminAuthenticated } = useStore();
@@ -34,25 +33,42 @@ function StoreAppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-[#F5F3EF] flex flex-col font-sans-modern selection:bg-[#C6A76A]/20 selection:text-[#F5F3EF]">
-      {/* Promotional Top Announcement Banner */}
-      <PromoAnnouncementBar />
+    <div className="relative min-h-screen bg-[#050505] text-[#F5F3EF] flex flex-col font-sans-modern selection:bg-[#C6A76A]/20 selection:text-[#F5F3EF]">
+      {/* Global Luxury Ambient Background Backdrop */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0 overflow-hidden" 
+        aria-hidden="true"
+      >
+        <img
+          src="/src/assets/images/website_luxury_bg_1793460868026.jpg"
+          alt=""
+          referrerPolicy="no-referrer"
+          className="w-full h-full object-cover object-center opacity-40 select-none scale-105"
+        />
+        {/* Soft dark vignette gradients to ensure impeccable text clarity and contrast */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/75 via-[#050505]/40 to-[#050505]/90 pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_35%,transparent_25%,#050505_95%)] pointer-events-none" />
+      </div>
 
-      {/* Navigation */}
-      <Navbar />
+      <div className="relative z-10 flex flex-col flex-1">
+        {/* Promotional Top Announcement Banner */}
+        <PromoAnnouncementBar />
 
-      {/* Main Content Sections */}
-      <main className="flex-1">
-        <Hero />
-        <ProductCatalog />
-        <ProductSection />
-        <BrandPhilosophy />
-        <OrderStatusLookup />
-        <FAQSection />
-      </main>
+        {/* Navigation */}
+        <Navbar />
 
-      {/* Minimal Luxury Footer */}
-      <Footer />
+        {/* Main Content Sections */}
+        <main className="flex-1">
+          <Hero />
+          <ProductCatalog />
+          <ProductSection />
+          <BrandPhilosophy />
+          <FAQSection />
+        </main>
+
+        {/* Minimal Luxury Footer */}
+        <Footer />
+      </div>
 
       {/* Sticky Mobile Order Bar (<= 15% viewport height) */}
       <StickyMobileOrderBar />

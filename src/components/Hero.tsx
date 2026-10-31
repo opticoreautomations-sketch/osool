@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
-import { ArrowDown, ShoppingBag, ShieldCheck, Sparkles, Check, ChevronRight, ChevronLeft, PackageSearch } from 'lucide-react';
+import { ArrowDown, ShoppingBag, ShieldCheck, Sparkles, Check, ChevronRight, ChevronLeft } from 'lucide-react';
 
 export const Hero: React.FC = () => {
   const { 
@@ -17,7 +17,7 @@ export const Hero: React.FC = () => {
 
   if (!product || products.length === 0) {
     return (
-      <section className="relative min-h-[calc(100vh-5rem)] flex items-center justify-center overflow-hidden bg-[#050505] border-b border-[#1a1a1a]">
+      <section className="relative min-h-[calc(100vh-5rem)] flex items-center justify-center overflow-hidden bg-[#050505]/70 backdrop-blur-[1px] border-b border-[#1a1a1a]">
         <div 
           className="absolute inset-0 pointer-events-none opacity-20 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(198,167,106,0.15),transparent_70%)]" 
           aria-hidden="true"
@@ -50,24 +50,23 @@ export const Hero: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  const el = document.getElementById('order-status');
+                  const el = document.getElementById('philosophy');
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold tracking-wide text-[#050505] bg-[#C6A76A] hover:bg-[#D4B87D] rounded-lg transition-all shadow-lg active:scale-98 cursor-pointer"
               >
-                <PackageSearch className="w-4 h-4" />
-                <span>{isAr ? 'تتبع حالة طلب سابق' : 'Track Order Status'}</span>
+                <span>{isAr ? 'استكشف قصة أصول' : 'Discover Our Story'}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => {
-                  const el = document.getElementById('philosophy');
+                  const el = document.getElementById('faq');
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-medium tracking-wide text-[#F5F3EF] bg-[#111111] hover:bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg transition-all cursor-pointer"
               >
-                <span>{isAr ? 'قصة علامة أصول' : 'Discover Our Story'}</span>
+                <span>{isAr ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'}</span>
               </button>
             </div>
           </div>
@@ -85,7 +84,7 @@ export const Hero: React.FC = () => {
   };
 
   return (
-    <section className="relative min-h-[calc(100vh-5rem)] flex items-center justify-center overflow-hidden bg-[#050505] border-b border-[#1a1a1a]">
+    <section className="relative min-h-[calc(100vh-5rem)] flex items-center justify-center overflow-hidden bg-[#050505]/70 backdrop-blur-[1px] border-b border-[#1a1a1a]">
       {/* Background ambient lighting subtle gold gradient */}
       <div 
         className="absolute inset-0 pointer-events-none opacity-20 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(198,167,106,0.15),transparent_70%)]" 

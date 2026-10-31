@@ -32,7 +32,7 @@ export const BrandPhilosophy: React.FC = () => {
   ];
 
   return (
-    <section id="philosophy" className="py-20 sm:py-28 bg-[#050505] border-b border-[#1a1a1a] relative">
+    <section id="philosophy" className="py-20 sm:py-28 bg-[#050505]/75 backdrop-blur-[1px] border-b border-[#1a1a1a] relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Core Brand Story / Quote Block */}

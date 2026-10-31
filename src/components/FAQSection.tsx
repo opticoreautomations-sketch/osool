@@ -14,7 +14,7 @@ export const FAQSection: React.FC = () => {
   };
 
   return (
-    <section id="faq" className="py-20 sm:py-28 bg-[#0a0a0a] border-b border-[#1a1a1a]">
+    <section id="faq" className="py-20 sm:py-28 bg-[#0a0a0a]/75 backdrop-blur-[1px] border-b border-[#1a1a1a]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}

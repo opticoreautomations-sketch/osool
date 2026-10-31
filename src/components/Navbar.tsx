@@ -13,7 +13,6 @@ export const Navbar: React.FC = () => {
     { href: '#product', label: isAr ? 'مواصفات ومقارنة الساعات' : 'Watch Specs & Compare' },
     { href: '#craftsmanship', label: isAr ? 'التصميم' : 'Design' },
     { href: '#philosophy', label: isAr ? 'قصة أصول' : 'Brand Story' },
-    { href: '#order-status', label: isAr ? 'تتبع الطلب' : 'Track Order' },
     { href: '#faq', label: isAr ? 'الأسئلة الشائعة' : 'FAQ' },
   ];
 

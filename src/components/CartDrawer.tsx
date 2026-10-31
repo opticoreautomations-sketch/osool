@@ -63,8 +63,7 @@ export const CartDrawer: React.FC = () => {
     removeDraftOrder,
     reorderDraft,
     latestSubmittedOrder,
-    addToCart,
-    navigateToOrderLookup
+    addToCart
   } = useStore();
 
   const [activeTab, setActiveTab] = useState<'bag' | 'history'>('bag');
@@ -390,19 +389,9 @@ export const CartDrawer: React.FC = () => {
                         onClick={() => setActiveTab('history')}
                         className="text-[10px] text-[#A3A3A3] hover:text-[#F5F3EF] hover:underline cursor-pointer"
                       >
-                        {isAr ? 'السجل' : 'Record'}
+                        {isAr ? 'عرض سجل الطلبات' : 'View Orders Record'}
                       </button>
                     )}
-                    <button
-                      onClick={() => {
-                        closeCart();
-                        navigateToOrderLookup(latestOrder.id);
-                      }}
-                      className="text-[10px] text-[#C6A76A] hover:underline flex items-center gap-1 cursor-pointer font-medium"
-                    >
-                      <Truck className="w-3 h-3" />
-                      <span>{isAr ? 'تتبع مسار الشحنة ←' : 'Track Order →'}</span>
-                    </button>
                   </div>
                 </div>
               </div>
@@ -693,18 +682,6 @@ export const CartDrawer: React.FC = () => {
                             <MessageCircle className="w-3.5 h-3.5" />
                             <span>{isAr ? 'فتح في واتساب' : 'Open WhatsApp'}</span>
                             <ExternalLink className="w-3 h-3" />
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              closeCart();
-                              navigateToOrderLookup(order.id);
-                            }}
-                            className="py-2 px-2.5 rounded bg-[#17140b] hover:bg-[#231d0e] text-xs font-medium text-[#C6A76A] hover:text-[#D4B87D] border border-[#C6A76A]/40 transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                            title={isAr ? 'تتبع مسار الشحنة' : 'Track Delivery'}
-                          >
-                            <Truck className="w-3.5 h-3.5" />
-                            <span>{isAr ? 'تتبع الشحنة' : 'Track'}</span>
                           </button>
 
                           <button
