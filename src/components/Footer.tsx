@@ -1,22 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useStore } from '../context/StoreContext';
 import { STORE_CONFIG } from '../config/storeConfig';
 import { MessageCircle, Instagram, Phone } from 'lucide-react';
 
 export const Footer: React.FC = () => {
-  const { language, openPolicy, openOrderModal, setIsAdminView } = useStore();
-  const [secretClickCount, setSecretClickCount] = useState(0);
+  const { language, openPolicy, openOrderModal } = useStore();
   const isAr = language === 'ar';
-
-  const handleSecretAdminTrigger = () => {
-    const next = secretClickCount + 1;
-    if (next >= 4) {
-      setSecretClickCount(0);
-      setIsAdminView(true);
-    } else {
-      setSecretClickCount(next);
-    }
-  };
 
   return (
     <footer className="bg-[#050505]/80 backdrop-blur-[2px] border-t border-[#1a1a1a] text-xs text-[#737373] pb-24 lg:pb-12 pt-16">
@@ -139,11 +128,7 @@ export const Footer: React.FC = () => {
 
         {/* Bottom Hairline & Legal Transparency */}
         <div className="pt-8 border-t border-[#1a1a1a] flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-start text-xs text-[#525252]">
-          <div 
-            onClick={handleSecretAdminTrigger} 
-            className="cursor-default select-none transition-colors hover:text-[#737373]"
-            title="OSOOL Official"
-          >
+          <div className="select-none text-[#666666]">
             © {new Date().getFullYear()} OSOOL (أصول). {isAr ? 'جميع الحقوق محفوظة.' : 'All rights reserved.'}
           </div>
 

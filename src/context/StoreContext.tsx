@@ -184,27 +184,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   });
 
-  // Listen for hidden admin keyboard shortcut and hash updates
+  // Listen for admin hash updates (#admin)
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Secret key combination: Ctrl+Shift+A or Alt+A to toggle admin view
-      if ((e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) ||
-          (e.altKey && (e.key === 'A' || e.key === 'a'))) {
-        e.preventDefault();
-        setIsAdminView(prev => !prev);
-      }
-    };
-
     const handleHashChange = () => {
       if (window.location.hash === '#admin') {
         setIsAdminView(true);
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('hashchange', handleHashChange);
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('hashchange', handleHashChange);
     };
   }, []);
