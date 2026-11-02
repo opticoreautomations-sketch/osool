@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { 
   Product, 
+  ProductImage,
   ProductSpecification, 
   OrderStatus, 
   DraftOrder, 
@@ -51,7 +52,10 @@ import {
   Calendar,
   Copy,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  Upload,
+  Star,
+  Loader2
 } from 'lucide-react';
 
 // Preset luxury watch images generated for OSOOL
@@ -97,6 +101,44 @@ const PRESET_WATCH_IMAGES = [
     src: '/src/assets/images/product_osool_noir_wrist_1793109558602.jpg'
   }
 ];
+
+// Helper to compress uploaded user photos to high-performance web resolution
+const compressImageFile = (file: File, maxWidth = 1200, maxHeight = 1200, quality = 0.82): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (e) => {
+      const img = new Image();
+      img.src = e.target?.result as string;
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth || height > maxHeight) {
+          if (width > height) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(e.target?.result as string);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressedBase64);
+      };
+      img.onerror = () => resolve(e.target?.result as string);
+    };
+    reader.onerror = (err) => reject(err);
+  });
+};
 
 export const AdminPage: React.FC = () => {
   const { 
@@ -189,6 +231,12 @@ export const AdminPage: React.FC = () => {
   const [customImageUrl, setCustomImageUrl] = useState('');
   const [inStock, setInStock] = useState(true);
 
+  // Photos gallery state (supports multiple uploaded photos, presets, or URLs)
+  const [productImages, setProductImages] = useState<ProductImage[]>([]);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState<boolean>(false);
+  const [photoUploadError, setPhotoUploadError] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
   // Specifications
   const [caseDiameter, setCaseDiameter] = useState('40 mm');
   const [caseProfile, setCaseProfile] = useState('7.5 mm (Ultra-slim)');
@@ -199,6 +247,141 @@ export const AdminPage: React.FC = () => {
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    setIsUploadingPhoto(true);
+    setPhotoUploadError(null);
+
+    try {
+      const newImages: ProductImage[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.startsWith('image/')) {
+          continue;
+        }
+        const compressedBase64 = await compressImageFile(file, 1200, 1200, 0.82);
+        const isFirst = productImages.length === 0 && newImages.length === 0;
+        newImages.push({
+          id: `upload-${Date.now()}-${i}-${Math.random().toString(36).substr(2, 4)}`,
+          src: compressedBase64,
+          altEn: nameEn.trim() || 'OSOOL Watch Photo',
+          altAr: nameAr.trim() || 'صورة ساعة أصول',
+          labelEn: isFirst ? 'Primary Cover' : `Gallery Angle ${productImages.length + newImages.length + 1}`,
+          labelAr: isFirst ? 'الصورة الرئيسية' : `زاوية العرض ${productImages.length + newImages.length + 1}`
+        });
+      }
+
+      if (newImages.length > 0) {
+        setProductImages(prev => [...prev, ...newImages]);
+        showToast(isAr ? `تم رفع ${newImages.length} صورة بنجاح` : `${newImages.length} photo(s) uploaded successfully`);
+      } else {
+        setPhotoUploadError(isAr ? 'يرجى اختيار ملف صورة صالح (JPG, PNG, WebP)' : 'Please select a valid image file');
+      }
+    } catch (err) {
+      console.error('Error uploading photo', err);
+      setPhotoUploadError(isAr ? 'حدث خطأ أثناء معالجة الصورة، يرجى المحاولة بصورة أصغر' : 'Failed to process image');
+    } finally {
+      setIsUploadingPhoto(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleDropFiles = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const files = e.dataTransfer.files;
+    if (!files || files.length === 0) return;
+    
+    setIsUploadingPhoto(true);
+    setPhotoUploadError(null);
+
+    try {
+      const newImages: ProductImage[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.startsWith('image/')) continue;
+        const compressedBase64 = await compressImageFile(file, 1200, 1200, 0.82);
+        const isFirst = productImages.length === 0 && newImages.length === 0;
+        newImages.push({
+          id: `drop-${Date.now()}-${i}-${Math.random().toString(36).substr(2, 4)}`,
+          src: compressedBase64,
+          altEn: nameEn.trim() || 'OSOOL Watch Photo',
+          altAr: nameAr.trim() || 'صورة ساعة أصول',
+          labelEn: isFirst ? 'Primary Cover' : `Gallery Angle ${productImages.length + newImages.length + 1}`,
+          labelAr: isFirst ? 'الصورة الرئيسية' : `زاوية العرض ${productImages.length + newImages.length + 1}`
+        });
+      }
+      if (newImages.length > 0) {
+        setProductImages(prev => [...prev, ...newImages]);
+        showToast(isAr ? `تم إضافة ${newImages.length} صورة بنجاح` : `${newImages.length} photo(s) added`);
+      }
+    } catch (err) {
+      setPhotoUploadError(isAr ? 'حدث خطأ أثناء معالجة الصور' : 'Failed to process photos');
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
+
+  const setMainPhoto = (index: number) => {
+    if (index === 0) return;
+    setProductImages(prev => {
+      const updated = [...prev];
+      const [chosen] = updated.splice(index, 1);
+      // Update label of primary
+      chosen.labelEn = 'Primary Cover';
+      chosen.labelAr = 'الصورة الرئيسية';
+      return [chosen, ...updated];
+    });
+    showToast(isAr ? 'تم تعيين الصورة كصورة رئيسية للمنتج' : 'Set as primary cover photo');
+  };
+
+  const removePhoto = (index: number) => {
+    setProductImages(prev => {
+      const updated = prev.filter((_, i) => i !== index);
+      if (updated.length > 0) {
+        updated[0].labelEn = 'Primary Cover';
+        updated[0].labelAr = 'الصورة الرئيسية';
+      }
+      return updated;
+    });
+    showToast(isAr ? 'تم حذف الصورة من المعرض' : 'Photo removed from gallery');
+  };
+
+  const handleAddCustomUrlPhoto = () => {
+    if (!customImageUrl.trim()) return;
+    const cleanUrl = customImageUrl.trim();
+    const isFirst = productImages.length === 0;
+    const newImg: ProductImage = {
+      id: `url-${Date.now()}`,
+      src: cleanUrl,
+      altEn: nameEn.trim() || 'OSOOL Watch Photo',
+      altAr: nameAr.trim() || 'صورة ساعة أصول',
+      labelEn: isFirst ? 'Primary Cover' : `Photo ${productImages.length + 1}`,
+      labelAr: isFirst ? 'الصورة الرئيسية' : `صورة ${productImages.length + 1}`
+    };
+    setProductImages(prev => [...prev, newImg]);
+    setCustomImageUrl('');
+    showToast(isAr ? 'تمت إضافة رابط الصورة إلى المعرض' : 'Photo URL added to gallery');
+  };
+
+  const handleAddPresetPhoto = (presetSrc: string, labelEn: string, labelAr: string) => {
+    const isFirst = productImages.length === 0;
+    const newImg: ProductImage = {
+      id: `preset-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      src: presetSrc,
+      altEn: nameEn.trim() || labelEn,
+      altAr: nameAr.trim() || labelAr,
+      labelEn: isFirst ? 'Primary Cover' : labelEn,
+      labelAr: isFirst ? 'الصورة الرئيسية' : labelAr
+    };
+    setProductImages(prev => [...prev, newImg]);
+    showToast(isAr ? 'تمت إضافة الصورة الجاهزة للمعرض' : 'Preset photo added to gallery');
   };
 
   const openAddForm = () => {
@@ -214,8 +397,10 @@ export const AdminPage: React.FC = () => {
     setShortDescriptionAr('صُممت للأناقة اليومية بخطوط معمارية هادئة وفخامة تعبر عن حضورك الواثق.');
     setFullDescriptionEn('A statement of modern luxury designed for Saudi gentlemen who value subtle sophistication.');
     setFullDescriptionAr('تعبير راقٍ عن الفخامة الهادئة للرجل السعودي الذي يقدّر التفاصيل الدقيقة.');
+    setProductImages([]);
     setSelectedImageSrc(PRESET_WATCH_IMAGES[1].src);
     setCustomImageUrl('');
+    setPhotoUploadError(null);
     setInStock(true);
     setCaseDiameter('40 mm');
     setCaseProfile('7.5 mm (Ultra-slim)');
@@ -238,7 +423,10 @@ export const AdminPage: React.FC = () => {
     setShortDescriptionAr(prod.shortDescriptionAr);
     setFullDescriptionEn(prod.fullDescriptionEn);
     setFullDescriptionAr(prod.fullDescriptionAr);
+    setProductImages(prod.images && prod.images.length > 0 ? [...prod.images] : []);
     setSelectedImageSrc(prod.images[0]?.src || PRESET_WATCH_IMAGES[0].src);
+    setCustomImageUrl('');
+    setPhotoUploadError(null);
     setInStock(prod.inStock);
     
     // Find specs
@@ -258,8 +446,46 @@ export const AdminPage: React.FC = () => {
 
   const handleSaveProduct = (e: React.FormEvent) => {
     e.preventDefault();
+    setPhotoUploadError(null);
 
-    const activeImage = customImageUrl.trim() || selectedImageSrc;
+    // Determine the final list of photos
+    let finalImages: ProductImage[] = [...productImages];
+
+    if (customImageUrl.trim()) {
+      finalImages.push({
+        id: `url-${Date.now()}`,
+        src: customImageUrl.trim(),
+        altEn: nameEn.trim() || 'OSOOL Watch Photo',
+        altAr: nameAr.trim() || 'صورة ساعة أصول',
+        labelEn: finalImages.length === 0 ? 'Primary Cover' : `Photo ${finalImages.length + 1}`,
+        labelAr: finalImages.length === 0 ? 'الصورة الرئيسية' : `صورة ${finalImages.length + 1}`
+      });
+    }
+
+    if (finalImages.length === 0) {
+      if (selectedImageSrc) {
+        finalImages.push({
+          id: 'preset-default',
+          src: selectedImageSrc,
+          altEn: nameEn.trim() || 'OSOOL Timepiece',
+          altAr: nameAr.trim() || 'ساعة أصول',
+          labelEn: 'Primary Cover',
+          labelAr: 'الصورة الرئيسية'
+        });
+      } else {
+        setPhotoUploadError(isAr ? 'يرجى رفع صورة واحدة على الأقل للساعة' : 'Please upload at least one photo for this timepiece');
+        return;
+      }
+    }
+
+    // Ensure all images have updated alt text
+    finalImages = finalImages.map((img, idx) => ({
+      ...img,
+      altEn: nameEn.trim() || img.altEn || 'OSOOL Timepiece',
+      altAr: nameAr.trim() || img.altAr || 'ساعة أصول',
+      labelEn: idx === 0 ? 'Primary Cover' : (img.labelEn || `Angle ${idx + 1}`),
+      labelAr: idx === 0 ? 'الصورة الرئيسية' : (img.labelAr || `زاوية العرض ${idx + 1}`)
+    }));
 
     const specs: ProductSpecification[] = [
       {
@@ -324,17 +550,7 @@ export const AdminPage: React.FC = () => {
           inStock,
           stockStatusEn: inStock ? 'In Stock · Ready to Dispatch' : 'Out of Stock',
           stockStatusAr: inStock ? 'متوفر للطلب الفوري · شحن سريع' : 'نفدت الكمية حالياً',
-          images: [
-            {
-              id: 'main',
-              src: activeImage,
-              altEn: nameEn,
-              altAr: nameAr,
-              labelEn: 'Front View',
-              labelAr: 'المنظور الرئيسي'
-            },
-            ...(existing.images.slice(1))
-          ],
+          images: finalImages,
           specifications: specs
         };
         updateProduct(updated);
@@ -361,32 +577,7 @@ export const AdminPage: React.FC = () => {
         inStock,
         stockStatusEn: inStock ? 'In Stock · Ready to Dispatch' : 'Out of Stock',
         stockStatusAr: inStock ? 'متوفر للطلب الفوري · شحن سريع' : 'نفدت الكمية حالياً',
-        images: [
-          {
-            id: 'main',
-            src: activeImage,
-            altEn: nameEn,
-            altAr: nameAr,
-            labelEn: 'Front View',
-            labelAr: 'المنظور الرئيسي'
-          },
-          {
-            id: 'dial',
-            src: PRESET_WATCH_IMAGES[3].src,
-            altEn: 'Macro Dial',
-            altAr: 'تفاصيل الميناء',
-            labelEn: 'Dial Detail',
-            labelAr: 'الميناء'
-          },
-          {
-            id: 'profile',
-            src: PRESET_WATCH_IMAGES[4].src,
-            altEn: 'Profile Angle',
-            altAr: 'المنظور الجانبي',
-            labelEn: 'Profile',
-            labelAr: 'الجانب'
-          }
-        ],
+        images: finalImages,
         specifications: specs
       };
       addProduct(newProduct);
@@ -2360,65 +2551,213 @@ Would you like us to confirm and dispatch your order today?`;
                 </div>
               </div>
 
-              {/* Image Selection Presets & Custom URL */}
-              <div className="space-y-3 pt-2 border-t border-[#1e1e1e]">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-[#C6A76A] uppercase tracking-wider flex items-center gap-1.5">
-                    <ImageIcon className="w-3.5 h-3.5" />
-                    <span>{isAr ? 'اختيار صورة المنتج' : 'Select Product Photography'}</span>
-                  </span>
-                  <span className="text-[11px] text-[#737373]">
-                    {isAr ? 'اختر من تصاميم أصول الجاهزة أو ضع رابط صورة خاص بك' : 'Choose luxury preset or custom URL'}
+              {/* Product Photo Upload & Interactive Gallery */}
+              <div className="space-y-4 pt-3 border-t border-[#1e1e1e]">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1.5 rounded bg-[#1f1b12] border border-[#C6A76A]/30 text-[#C6A76A]">
+                      <Upload className="w-4 h-4" />
+                    </span>
+                    <div>
+                      <h4 className="text-xs font-semibold text-[#F5F3EF]">
+                        {isAr ? 'صور المنتج ومعرض العرض' : 'Product Photos & Gallery'}
+                      </h4>
+                      <p className="text-[11px] text-[#8c8c8c]">
+                        {isAr ? 'الصورة الأولى تكون دائماً هي صورة الغلاف الرئيسية في المتجر والسلة' : 'First image serves as primary cover in store catalog & bag'}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-[#141414] border border-[#2a2a2a] text-[#C6A76A]">
+                    {productImages.length} {isAr ? 'صور' : 'photos'}
                   </span>
                 </div>
 
-                {/* Preset Thumbnails */}
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
-                  {PRESET_WATCH_IMAGES.map((preset, idx) => {
-                    const isSelected = selectedImageSrc === preset.src && !customImageUrl;
-                    return (
+                {/* Hidden File Input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/png,image/jpeg,image/webp,image/jpg"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
+
+                {/* Drag and Drop Zone */}
+                <div
+                  onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                  onDrop={handleDropFiles}
+                  onClick={() => !isUploadingPhoto && fileInputRef.current?.click()}
+                  className={`group relative border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer ${
+                    isUploadingPhoto 
+                      ? 'border-[#C6A76A] bg-[#141414]/90 opacity-70 cursor-wait' 
+                      : 'border-[#2e2e2e] hover:border-[#C6A76A] bg-[#101010] hover:bg-[#151515]'
+                  }`}
+                >
+                  <div className="flex flex-col items-center justify-center space-y-2.5">
+                    <div className="w-12 h-12 rounded-full bg-[#1c1912] border border-[#C6A76A]/40 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      {isUploadingPhoto ? (
+                        <Loader2 className="w-6 h-6 text-[#C6A76A] animate-spin" />
+                      ) : (
+                        <Upload className="w-6 h-6 text-[#C6A76A]" />
+                      )}
+                    </div>
+
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-[#F5F3EF]">
+                        {isUploadingPhoto 
+                          ? (isAr ? 'جاري ضغط ومعالجة الصور...' : 'Processing and compressing photos...')
+                          : (isAr ? 'انقر لرفع صور من جهازك أو اسحب الصور وأفلتها هنا' : 'Click to upload photos from device or drag & drop here')}
+                      </p>
+                      <p className="text-[11px] text-[#737373]">
+                        {isAr ? 'يدعم PNG, JPG, WebP — يتم ضغط الصور تلقائياً لأقصى سرعة تحميل' : 'Supports PNG, JPG, WebP — automatically compressed for ultra-fast loading'}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={isUploadingPhoto}
+                      className="mt-1 px-4 py-1.5 rounded text-xs font-semibold bg-[#C6A76A] text-[#050505] hover:bg-[#D4B87D] transition-colors cursor-pointer"
+                    >
+                      {isAr ? 'اختيار ملفات الصور من الحاسوب' : 'Browse Files on Device'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Photo Upload Error Feedback */}
+                {photoUploadError && (
+                  <div className="p-3 rounded bg-red-950/40 border border-red-800/50 flex items-center gap-2 text-xs text-red-300">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+                    <span>{photoUploadError}</span>
+                  </div>
+                )}
+
+                {/* Uploaded Gallery Grid */}
+                {productImages.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs text-[#A3A3A3]">
+                      <span>{isAr ? 'معرض صور المنتج الحالي:' : 'Current Product Photos:'}</span>
+                      <span className="text-[11px] text-[#737373]">
+                        {isAr ? 'انقر "تعيين كغلاف" لتغيير الصورة الرئيسية' : 'Click "Set as Cover" to change primary photo'}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                      {productImages.map((img, idx) => {
+                        const isPrimary = idx === 0;
+                        return (
+                          <div
+                            key={img.id || idx}
+                            className={`group relative rounded-lg overflow-hidden border transition-all bg-[#0d0d0d] flex flex-col ${
+                              isPrimary 
+                                ? 'border-[#C6A76A] ring-2 ring-[#C6A76A]/30 shadow-lg shadow-[#C6A76A]/5' 
+                                : 'border-[#262626] hover:border-[#3a3a3a]'
+                            }`}
+                          >
+                            {/* Photo Aspect Container */}
+                            <div className="relative aspect-4/3 w-full overflow-hidden bg-[#141414]">
+                              <img
+                                src={img.src}
+                                alt={isAr ? img.altAr : img.altEn}
+                                referrerPolicy="no-referrer"
+                                className="w-full h-full object-cover transition-transform group-hover:scale-102"
+                              />
+
+                              {/* Index Badge */}
+                              <div className="absolute bottom-1.5 start-1.5 px-1.5 py-0.5 rounded text-[10px] font-mono bg-black/70 text-white/90 backdrop-blur-xs">
+                                #{idx + 1}
+                              </div>
+
+                              {/* Delete Action Button */}
+                              <button
+                                type="button"
+                                onClick={() => removePhoto(idx)}
+                                title={isAr ? 'حذف هذه الصورة' : 'Delete photo'}
+                                className="absolute top-1.5 end-1.5 p-1 rounded-md bg-black/80 hover:bg-red-950/90 text-[#A3A3A3] hover:text-red-400 border border-white/10 transition-colors cursor-pointer shadow"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+
+                            {/* Card Details / Actions */}
+                            <div className="p-2 flex flex-col gap-1.5 text-xs">
+                              {isPrimary ? (
+                                <div className="flex items-center justify-center gap-1 py-1 rounded bg-[#C6A76A]/15 border border-[#C6A76A]/40 text-[#E8D7B5] font-medium text-[11px]">
+                                  <Star className="w-3 h-3 fill-[#C6A76A] text-[#C6A76A]" />
+                                  <span>{isAr ? 'الغلاف الرئيسي' : 'Primary Cover'}</span>
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => setMainPhoto(idx)}
+                                  className="flex items-center justify-center gap-1 py-1 rounded bg-[#161616] hover:bg-[#222222] border border-[#2c2c2c] text-[#A3A3A3] hover:text-[#C6A76A] transition-colors text-[11px] cursor-pointer"
+                                >
+                                  <Star className="w-3 h-3" />
+                                  <span>{isAr ? 'تعيين كغلاف' : 'Set as Cover'}</span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Additional Options: Preset library and direct URL */}
+                <div className="pt-2 border-t border-[#1a1a1a] space-y-3">
+                  <div>
+                    <label className="block text-xs text-[#A3A3A3] mb-1.5">
+                      {isAr ? 'أو أضف صورة جاهزة من تصاميم أصول المصورة:' : 'Or add from OSOOL Luxury Watch Presets:'}
+                    </label>
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                      {PRESET_WATCH_IMAGES.map((preset, idx) => (
+                        <button
+                          type="button"
+                          key={idx}
+                          onClick={() => handleAddPresetPhoto(preset.src, preset.labelEn, preset.labelAr)}
+                          className="group relative aspect-4/3 rounded overflow-hidden border border-[#262626] hover:border-[#C6A76A] transition-all cursor-pointer"
+                          title={isAr ? `إضافة ${preset.labelAr} للمعرض` : `Add ${preset.labelEn} to gallery`}
+                        >
+                          <img
+                            src={preset.src}
+                            alt={preset.labelEn}
+                            referrerPolicy="no-referrer"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                            <span className="p-1 rounded-full bg-[#C6A76A] text-[#050505]">
+                              <Plus className="w-3.5 h-3.5" />
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Add by Custom URL */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs text-[#8c8c8c]">
+                      {isAr ? 'أو أضف رابط صورة مباشر عبر الإنترنت (URL):' : 'Or append photo by direct web link (URL):'}
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="url"
+                        value={customImageUrl}
+                        onChange={(e) => setCustomImageUrl(e.target.value)}
+                        placeholder="https://images.unsplash.com/photo-..."
+                        className="flex-1 px-3 py-2 text-xs rounded bg-[#141414] border border-[#2a2a2a] text-[#F5F3EF] placeholder-[#555555] focus:border-[#C6A76A] focus:outline-none font-mono"
+                        dir="ltr"
+                      />
                       <button
                         type="button"
-                        key={idx}
-                        onClick={() => {
-                          setSelectedImageSrc(preset.src);
-                          setCustomImageUrl('');
-                        }}
-                        className={`relative aspect-4/3 rounded overflow-hidden border transition-all cursor-pointer ${
-                          isSelected 
-                            ? 'border-[#C6A76A] ring-2 ring-[#C6A76A]/40' 
-                            : 'border-[#262626] opacity-60 hover:opacity-100'
-                        }`}
+                        onClick={handleAddCustomUrlPhoto}
+                        disabled={!customImageUrl.trim()}
+                        className="px-3 py-2 rounded text-xs font-semibold bg-[#1a1a1a] hover:bg-[#252525] border border-[#2e2e2e] text-[#F5F3EF] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap transition-colors"
                       >
-                        <img
-                          src={preset.src}
-                          alt={preset.labelEn}
-                          referrerPolicy="no-referrer"
-                          className="w-full h-full object-cover"
-                        />
-                        {isSelected && (
-                          <div className="absolute top-1 end-1 w-4 h-4 rounded-full bg-[#C6A76A] text-[#050505] flex items-center justify-center text-[10px]">
-                            ✓
-                          </div>
-                        )}
+                        {isAr ? 'إضافة للمعرض' : 'Add to Gallery'}
                       </button>
-                    );
-                  })}
-                </div>
-
-                {/* Custom URL Input */}
-                <div>
-                  <label className="block text-xs text-[#8c8c8c] mb-1">
-                    {isAr ? 'أو ضع رابط صورة مباشر (URL):' : 'Or paste a direct image URL:'}
-                  </label>
-                  <input
-                    type="url"
-                    value={customImageUrl}
-                    onChange={(e) => setCustomImageUrl(e.target.value)}
-                    placeholder="https://example.com/watch-photo.jpg"
-                    className="w-full px-3 py-2 text-xs rounded bg-[#141414] border border-[#2a2a2a] text-[#F5F3EF] placeholder-[#555555] focus:border-[#C6A76A] focus:outline-none font-mono"
-                    dir="ltr"
-                  />
+                    </div>
+                  </div>
                 </div>
               </div>
 
