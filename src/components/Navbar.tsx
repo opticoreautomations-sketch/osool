@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
-import { Menu, X, MessageCircle, Globe, ShoppingBag } from 'lucide-react';
+import { Menu, X, MessageCircle, Globe, ShoppingBag, Instagram, Youtube } from 'lucide-react';
+import { STORE_CONFIG } from '../config/storeConfig';
 
 export const Navbar: React.FC = () => {
   const { language, toggleLanguage, openOrderModal, openCart, cartQuantity, orderHistory } = useStore();
@@ -97,6 +98,44 @@ export const Navbar: React.FC = () => {
             <span>{isAr ? 'EN' : 'العربية'}</span>
           </button>
 
+          {/* Instagram Link */}
+          <a
+            href={STORE_CONFIG.instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden sm:flex items-center p-2 text-[#A3A3A3] hover:text-[#C6A76A] border border-[#262626] rounded hover:border-[#C6A76A]/40 transition-colors"
+            aria-label="Instagram @osoolofficial1"
+            title="Instagram: @osoolofficial1"
+          >
+            <Instagram className="w-4 h-4" />
+          </a>
+
+          {/* TikTok Link */}
+          <a
+            href={STORE_CONFIG.tiktokUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden sm:flex items-center p-2 text-[#A3A3A3] hover:text-[#C6A76A] border border-[#262626] rounded hover:border-[#C6A76A]/40 transition-colors"
+            aria-label="TikTok @osoolwatchesoffical"
+            title="TikTok: @osoolwatchesoffical"
+          >
+            <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.29 0 .58.04.86.12V9.42a6.37 6.37 0 0 0-.86-.06A6.34 6.34 0 0 0 3.1 15.7a6.34 6.34 0 0 0 10.83 4.47v-7.14a8.27 8.27 0 0 0 5.66 2.24v-3.48a4.84 4.84 0 0 1-3.77-1.1v-4z" />
+            </svg>
+          </a>
+
+          {/* YouTube Link */}
+          <a
+            href={STORE_CONFIG.youtubeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden sm:flex items-center p-2 text-[#A3A3A3] hover:text-[#C6A76A] border border-[#262626] rounded hover:border-[#C6A76A]/40 transition-colors"
+            aria-label="YouTube @OsoolWatchesOfficial"
+            title="YouTube: @OsoolWatchesOfficial"
+          >
+            <Youtube className="w-4 h-4" />
+          </a>
+
           {/* Primary CTA */}
           <button
             onClick={openOrderModal}
@@ -139,11 +178,48 @@ export const Navbar: React.FC = () => {
                 setMobileMenuOpen(false);
                 openOrderModal();
               }}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 text-sm font-semibold text-[#050505] bg-[#C6A76A] rounded transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 text-sm font-semibold text-[#050505] bg-[#C6A76A] rounded transition-colors cursor-pointer"
             >
               <MessageCircle className="w-4 h-4" />
               <span>{isAr ? 'اطلب عبر واتساب (229 ر.س)' : 'Order via WhatsApp (229 SAR)'}</span>
             </button>
+
+            <div className="grid grid-cols-3 gap-2">
+              <a
+                href={STORE_CONFIG.instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex flex-col items-center justify-center gap-1 py-2 px-1 text-[11px] font-medium text-[#F5F3EF] bg-[#141414] hover:bg-[#1a1a1a] border border-[#262626] rounded transition-colors"
+              >
+                <Instagram className="w-3.5 h-3.5 text-[#C6A76A]" />
+                <span className="truncate max-w-full">Instagram</span>
+              </a>
+
+              <a
+                href={STORE_CONFIG.tiktokUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex flex-col items-center justify-center gap-1 py-2 px-1 text-[11px] font-medium text-[#F5F3EF] bg-[#141414] hover:bg-[#1a1a1a] border border-[#262626] rounded transition-colors"
+              >
+                <svg className="w-3.5 h-3.5 fill-current text-[#C6A76A]" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.29 0 .58.04.86.12V9.42a6.37 6.37 0 0 0-.86-.06A6.34 6.34 0 0 0 3.1 15.7a6.34 6.34 0 0 0 10.83 4.47v-7.14a8.27 8.27 0 0 0 5.66 2.24v-3.48a4.84 4.84 0 0 1-3.77-1.1v-4z" />
+                </svg>
+                <span className="truncate max-w-full">TikTok</span>
+              </a>
+
+              <a
+                href={STORE_CONFIG.youtubeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex flex-col items-center justify-center gap-1 py-2 px-1 text-[11px] font-medium text-[#F5F3EF] bg-[#141414] hover:bg-[#1a1a1a] border border-[#262626] rounded transition-colors"
+              >
+                <Youtube className="w-3.5 h-3.5 text-[#C6A76A]" />
+                <span className="truncate max-w-full">YouTube</span>
+              </a>
+            </div>
           </div>
         </div>
       )}

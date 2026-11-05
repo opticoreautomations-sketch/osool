@@ -24,8 +24,12 @@ export const STORE_CONFIG = {
   displayPhoneInternational: '+966 54 869 1874',
   
   // Social links
-  instagramHandle: '@osool.sa',
-  instagramUrl: 'https://instagram.com', // STORE_OWNER_TODO: Replace with official Instagram page URL
+  instagramHandle: '@osoolofficial1',
+  instagramUrl: 'https://www.instagram.com/osoolofficial1/',
+  tiktokHandle: '@osoolwatchesoffical',
+  tiktokUrl: 'https://www.tiktok.com/@osoolwatchesoffical',
+  youtubeHandle: '@OsoolWatchesOfficial',
+  youtubeUrl: 'https://www.youtube.com/@OsoolWatchesOfficial',
   supportEmail: 'concierge@osool.sa',
 
   // Delivery configuration (Saudi Arabia)

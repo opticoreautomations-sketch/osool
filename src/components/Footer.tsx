@@ -1,7 +1,7 @@
 import React from 'react';
 import { useStore } from '../context/StoreContext';
 import { STORE_CONFIG } from '../config/storeConfig';
-import { MessageCircle, Instagram, Phone } from 'lucide-react';
+import { MessageCircle, Instagram, Phone, Youtube } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   const { language, openPolicy, openOrderModal } = useStore();
@@ -99,7 +99,7 @@ export const Footer: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 pt-1">
+            <div className="flex items-center gap-3 pt-1 flex-wrap">
               {/* WhatsApp direct */}
               <button
                 onClick={openOrderModal}
@@ -119,6 +119,32 @@ export const Footer: React.FC = () => {
               >
                 <Instagram className="w-3.5 h-3.5" />
                 <span>{STORE_CONFIG.instagramHandle}</span>
+              </a>
+
+              {/* TikTok */}
+              <a
+                href={STORE_CONFIG.tiktokUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-3.5 py-2 rounded bg-[#141414] hover:bg-[#1f1f1f] border border-[#2a2a2a] text-[#F5F3EF] hover:text-[#C6A76A] text-xs transition-colors"
+                aria-label="TikTok page"
+              >
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.29 0 .58.04.86.12V9.42a6.37 6.37 0 0 0-.86-.06A6.34 6.34 0 0 0 3.1 15.7a6.34 6.34 0 0 0 10.83 4.47v-7.14a8.27 8.27 0 0 0 5.66 2.24v-3.48a4.84 4.84 0 0 1-3.77-1.1v-4z" />
+                </svg>
+                <span>{STORE_CONFIG.tiktokHandle}</span>
+              </a>
+
+              {/* YouTube */}
+              <a
+                href={STORE_CONFIG.youtubeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-3.5 py-2 rounded bg-[#141414] hover:bg-[#1f1f1f] border border-[#2a2a2a] text-[#F5F3EF] hover:text-[#C6A76A] text-xs transition-colors"
+                aria-label="YouTube channel"
+              >
+                <Youtube className="w-3.5 h-3.5" />
+                <span>{STORE_CONFIG.youtubeHandle}</span>
               </a>
             </div>
 
